@@ -43,6 +43,7 @@ INSERT_USER_INTO_DATABASE() {
     if [[ $BEST_GAME > $COUNT ]]
     then
       UPDATE_BEST_GAME=$($PSQL "UPDATE users SET best_game='$COUNT' WHERE username='$USERNAME'")
+      UPDATE_GAMES_PLAYED=$($PSQL "UPDATE users SET games_played=games_played+1 WHERE username='$USERNAME'")
     fi
   fi
 }
