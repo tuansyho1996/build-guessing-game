@@ -1,5 +1,5 @@
 #!/bin/bash
-PSQL="psql -X --username=freecodecamp --dbname=number_guess --tuples-only -c"
+PSQL="psql -X --username=freecodecamp --dbname=number_guess --no-align --tuples-only -c"
 
 ENTER_NUMBER_GUESS() {
   echo "That is not an integer, guess again:"
