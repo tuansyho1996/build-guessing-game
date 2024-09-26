@@ -35,17 +35,8 @@ ENTER_AGAIN_GT_NUMBER() {
 }
 
 INSERT_USER_INTO_DATABASE() {
-  BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE username='$USERNAME'")
-  if [[ -z $BEST_GAME ]]
-  then
-    INSERT=$($PSQL "INSERT INTO users(username,games_played,best_game) VALUES('$USERNAME',1,'$COUNT')")
-  else
-    if [[ $BEST_GAME > $COUNT ]]
-    then
-      UPDATE_BEST_GAME=$($PSQL "UPDATE users SET best_game='$COUNT' WHERE username='$USERNAME'")
-      UPDATE_GAMES_PLAYED=$($PSQL "UPDATE users SET games_played=games_played+1 WHERE username='$USERNAME'")
-    fi
-  fi
+  echo "$USERNAME"
+  INSERT=$($PSQL "INSERT INTO users(username,guesses) VALUES('$USERNAME','$COUNT')")
 }
 
 MAIN() {
@@ -64,15 +55,16 @@ MAIN() {
 
 echo "Enter your username:"
 read USERNAME
-USER=$($PSQL "SELECT * FROM users WHERE username='$USERNAME'")
-if [[ -z $USER ]]
+IS_USERNAME=$($PSQL "SELECT username FROM users WHERE username='$USERNAME'")
+if [[ -z $IS_USERNAME ]]
 then
   echo "Welcome, $USERNAME! It looks like this is your first time here."
 else
-  echo "$USER" | while read NAME BAR GAMES_PLAYED BAR BEST_GAME BAR USER_ID
-  do
-    echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
-  done
+  GAMES_PLAYED=$($PSQL "SELECT COUNT(user_id) FROM users GROUP BY username HAVING username='$USERNAME'")
+  BEST_GAME=$($PSQL "SELECT MIN(guesses) FROM users WHERE username='$USERNAME' GROUP BY guesses")
+  BEST_GAME_CUSTOM
+  echo "$GAMES_PLAYED $BEST_GAME"
+  echo "Welcome back, $NAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
 fi
 NUMBER_RANDOM=$(( RANDOM % 1000 + 1 ))
 COUNT=0
