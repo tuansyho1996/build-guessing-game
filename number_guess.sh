@@ -34,6 +34,19 @@ ENTER_AGAIN_GT_NUMBER() {
   fi
 }
 
+INSERT_USER_INTO_DATABASE() {
+  BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE username='$USERNAME'")
+  if [[ -z $BEST_GAME ]]
+  then
+    INSERT=$($PSQL "INSERT INTO users(username,games_played,best_game) VALUES('$USERNAME',1,'$COUNT')")
+  else
+    if [[ $BEST_GAME > $COUNT ]]
+    then
+      UPDATE_BEST_GAME=$($PSQL "UPDATE users SET best_game='$COUNT' WHERE username='$USERNAME'")
+    fi
+  fi
+}
+
 MAIN() {
   COUNT=`expr $COUNT + 1`
   if [[ $NUMBER_GUESS > $NUMBER_RANDOM ]]
@@ -43,6 +56,7 @@ MAIN() {
   then
     ENTER_AGAIN_GT_NUMBER
   else
+    INSERT_USER_INTO_DATABASE
     echo "You guessed it in $COUNT tries. The secret number was $NUMBER_GUESS. Nice job!"
   fi
 }
@@ -70,7 +84,3 @@ then
 else
   MAIN
 fi
-
-
-
-
